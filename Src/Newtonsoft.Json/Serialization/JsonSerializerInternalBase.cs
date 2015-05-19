@@ -25,10 +25,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Net;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Utilities;
+using System.Diagnostics;
 
 namespace Newtonsoft.Json.Serialization
 {
@@ -47,8 +46,8 @@ namespace Newtonsoft.Json.Serialization
                 // put objects in a bucket based on their reference
                 return RuntimeHelpers.GetHashCode(obj);
 #else
-    // put all objects in the same bucket so ReferenceEquals is called on all
-        return -1;
+                // put all objects in the same bucket so ReferenceEquals is called on all
+                return -1;
 #endif
             }
         }

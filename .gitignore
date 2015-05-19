@@ -15,3 +15,5 @@ _ReSharper.*
 #NuGet
 packages
 !packages/repositories.config
+project.lock.json
+*.xproj

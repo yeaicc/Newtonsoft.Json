@@ -1,0 +1,132 @@
+﻿{
+  "version": "7.0.1-*",
+  "title": "Json.NET",
+  "description": "Json.NET is a popular high-performance JSON framework for .NET",
+  "authors": [ "James Newton-King" ],
+  "tags": [ "json" ],
+  "projectUrl": "http://www.newtonsoft.com/json",
+  "licenseUrl": "https://raw.github.com/JamesNK/Newtonsoft.Json/master/LICENSE.md",
+  "iconUrl": "http://www.newtonsoft.com/content/images/nugeticon.png",
+
+  "dependencies": {
+  },
+
+  "frameworks": {
+    "net45": {
+      "frameworkAssemblies": {
+        "System.Xml": "",
+        "System.Xml.Linq": "",
+        "System.Numerics": "",
+        "System.Data": "",
+        "System.Runtime.Serialization": ""
+      }
+    },
+    "net40": {
+      "compilationOptions": {
+        "define": [ "NET40" ]
+      },
+      "frameworkAssemblies": {
+        "System.Xml": "",
+        "System.Xml.Linq": "",
+        "System.Numerics": "",
+        "System.Data": "",
+        "System.Runtime.Serialization": ""
+      }
+    },
+    //"net35": {
+    //  "compilationOptions": {
+    //    "define": [ "NET35" ]
+    //  },
+    //  "frameworkAssemblies": {
+    //    "System.Xml": "",
+    //    "System.Xml.Linq": "",
+    //    "System.Data": "",
+    //    "System.Runtime.Serialization": ""
+    //  }
+    //}
+    //"net20": {
+    //  "compilationOptions": {
+    //    "define": [ "NET20" ]
+    //  },
+    //  "frameworkAssemblies": {
+    //    "System.Xml": "",
+    //    "System.Data": ""
+    //  }
+    //}
+    "net45+win+wp80+wpa81": {
+      "compilationOptions": {
+        "define": [ "PORTABLE" ]
+      },
+      "frameworkAssemblies": {
+        "Microsoft.CSharp": "",
+        "System": "",
+        "System.Collections": "",
+        "System.Core": "",
+        "System.Diagnostics.Debug": "",
+        "System.Diagnostics.Tools": "",
+        "System.Dynamic.Runtime": "",
+        "System.Globalization": "",
+        "System.IO": "",
+        "System.Linq": "",
+        "System.Linq.Expressions": "",
+        "System.ObjectModel": "",
+        "System.Reflection": "",
+        "System.Reflection.Extensions": "",
+        "System.Runtime": "",
+        "System.Runtime.Extensions": "",
+        "System.Runtime.Serialization": "",
+        "System.Runtime.Serialization.Primitives": "",
+        "System.Text.Encoding": "",
+        "System.Text.Encoding.Extensions": "",
+        "System.Text.RegularExpressions": "",
+        "System.Threading": "",
+        "System.Threading.Tasks": "",
+        "System.Xml": "",
+        "System.Xml.Linq": "",
+        "System.Xml.ReaderWriter": "",
+        "System.Xml.XDocument": ""
+      }
+    },
+    ".NETPortable,Version=v4.0,Profile=Profile328": {
+      "compilationOptions": {
+        "define": [ "PORTABLE40" ]
+      },
+      "frameworkAssemblies": {
+        "mscorlib": "",
+        "System": "",
+        "System.Core": "",
+        "System.Runtime.Serialization": "",
+        "System.Xml": ""
+      }
+    },
+    "dnxcore50": {
+      "compilationOptions": {
+        "define": [ "PORTABLE" ]
+      },
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.0-beta-*",
+        "System.Collections": "4.0.10-beta-*",
+        "System.ComponentModel.TypeConverter": "4.0.0-beta-*",
+        "System.Dynamic.Runtime": "4.0.10-beta-*",
+        "System.Globalization": "4.0.10-beta-*",
+        "System.IO": "4.0.10-beta-*",
+        "System.Linq": "4.0.0-beta-*",
+        "System.Linq.Expressions": "4.0.10-beta-*",
+        "System.Reflection.Extensions": "4.0.0-beta-*",
+        "System.Runtime": "4.0.20-beta-*",
+        "System.Text.RegularExpressions": "4.0.10-beta-*",
+        "System.Runtime.Extensions": "4.0.10-beta-*",
+        "System.Runtime.Numerics": "4.0.0-beta-*",
+        "System.Reflection.Emit.ILGeneration": "4.0.0-beta-*",
+        "System.Text.Encoding": "4.0.10-beta-*",
+        "System.Threading": "4.0.0-beta-*",
+        "System.Xml.XDocument": "4.0.0-beta-*",
+        "System.Xml.ReaderWriter": "4.0.10-beta-*",
+        "System.Runtime.Serialization.Primitives": "4.0.10-beta-*",
+        "System.Diagnostics.Tools": "4.0.0-beta-*",
+        "System.Diagnostics.Debug": "4.0.10-beta-*",
+        "System.Text.Encoding.Extensions": "4.0.10-beta-*"
+      }
+    }
+  }
+}
