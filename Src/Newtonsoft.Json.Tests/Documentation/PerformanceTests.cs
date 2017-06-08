@@ -36,11 +36,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using TestFixture = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
-using Test = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
-#elif DNXCORE50
+#if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
 using Assert = Newtonsoft.Json.Tests.XUnitAssert;
@@ -92,7 +88,9 @@ namespace Newtonsoft.Json.Tests.Documentation
 
             // this will only be called once and then cached
             if (objectType == typeof(DateTime) || objectType == typeof(DateTimeOffset))
+            {
                 contract.Converter = new JavaScriptDateTimeConverter();
+            }
 
             return contract;
         }

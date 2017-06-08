@@ -29,16 +29,12 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
 using System.Numerics;
 #endif
 using System.Text;
 using Newtonsoft.Json.Linq;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using TestFixture = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
-using Test = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
-#elif DNXCORE50
+#if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
 using Assert = Newtonsoft.Json.Tests.XUnitAssert;
@@ -81,7 +77,7 @@ namespace Newtonsoft.Json.Tests.Linq
                 Assert.Pass();
             }
         }
-
+        
         private void UpdateValueCount(IDictionary<string, int> counts, dynamic d)
         {
             string s = d.ToString();
@@ -96,13 +92,12 @@ namespace Newtonsoft.Json.Tests.Linq
             counts[s] = c;
         }
 
-#if !NETFX_CORE
         [Test]
         public void DeserializeLargeDynamic()
         {
             dynamic d;
 
-            using (var jsonFile = System.IO.File.OpenText("large.json"))
+            using (var jsonFile = System.IO.File.OpenText(ResolvePath("large.json")))
             using (JsonTextReader jsonTextReader = new JsonTextReader(jsonFile))
             {
                 JsonSerializer serializer = new JsonSerializer();
@@ -114,18 +109,25 @@ namespace Newtonsoft.Json.Tests.Linq
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
+            int count = 0;
             foreach (dynamic o in d)
             {
+                if (count > 10)
+                {
+                    break;
+                }
+
                 foreach (dynamic friend in o.friends)
                 {
                     UpdateValueCount(counts, friend.id);
-                    UpdateValueCount(counts, ((string) friend.name).Split(' ')[0]);
+                    UpdateValueCount(counts, ((string)friend.name).Split(' ')[0]);
                 }
+
+                count++;
             }
 
             Console.WriteLine("Time (secs): " + sw.Elapsed.TotalSeconds);
         }
-#endif
 
         [Test]
         public void JObjectPropertyNames()
@@ -255,7 +257,7 @@ namespace Newtonsoft.Json.Tests.Linq
                 new JProperty("Uri", new Uri("http://json.codeplex.com/")),
                 new JProperty("Guid", new Guid("EA27FE1D-0D80-44F2-BF34-4654156FA7AF")),
                 new JProperty("TimeSpan", TimeSpan.FromDays(1))
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
                 , new JProperty("BigInteger", BigInteger.Parse("1"))
 #endif
                 );
@@ -288,7 +290,7 @@ namespace Newtonsoft.Json.Tests.Linq
             Assert.IsTrue(d.Decimal == 1.1m);
             Assert.IsTrue(d.Decimal != 1.0f);
             Assert.IsTrue(d.Decimal != 1.0d);
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             Assert.IsTrue(d.Decimal > new BigInteger(0));
 #endif
 
@@ -304,11 +306,11 @@ namespace Newtonsoft.Json.Tests.Linq
             Assert.IsTrue(d.Float == 1.1m);
             Assert.IsTrue(d.Float != 1.0f);
             Assert.IsTrue(d.Float != 1.0d);
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             Assert.IsTrue(d.Float > new BigInteger(0));
 #endif
 
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             Assert.IsTrue(d.BigInteger == d.BigInteger);
             Assert.IsTrue(d.BigInteger > 0);
             Assert.IsTrue(d.BigInteger > 0.0m);
@@ -364,7 +366,7 @@ namespace Newtonsoft.Json.Tests.Linq
                 new JProperty("Uri", new Uri("http://json.codeplex.com/")),
                 new JProperty("Guid", new Guid("EA27FE1D-0D80-44F2-BF34-4654156FA7AF")),
                 new JProperty("TimeSpan", TimeSpan.FromDays(1))
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
                 , new JProperty("BigInteger", new BigInteger(100))
 #endif
                 );
@@ -443,7 +445,7 @@ namespace Newtonsoft.Json.Tests.Linq
             r += 2;
             Assert.AreEqual(null, r.Value);
 
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             r = d.BigInteger + null;
             Assert.AreEqual(null, r.Value);
             r += 2;
@@ -522,7 +524,7 @@ namespace Newtonsoft.Json.Tests.Linq
             r -= 2;
             Assert.AreEqual(null, r.Value);
 
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             r = d.BigInteger - null;
             Assert.AreEqual(null, r.Value);
             r -= 2;
@@ -596,7 +598,7 @@ namespace Newtonsoft.Json.Tests.Linq
             r *= 2;
             Assert.AreEqual(null, r.Value);
 
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             r = d.BigInteger * 1.1d;
             Assert.AreEqual(100m, (decimal)r);
             r *= 2;
@@ -670,7 +672,7 @@ namespace Newtonsoft.Json.Tests.Linq
             r /= 2;
             Assert.AreEqual(null, r.Value);
 
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             r = d.BigInteger / 1.1d;
             Assert.AreEqual(100m, (decimal)r);
             r /= 2;
@@ -698,7 +700,7 @@ namespace Newtonsoft.Json.Tests.Linq
                 new JProperty("Uri", new Uri("http://json.codeplex.com/")),
                 new JProperty("Guid", new Guid("EA27FE1D-0D80-44F2-BF34-4654156FA7AF")),
                 new JProperty("TimeSpan", TimeSpan.FromDays(1))
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
                 , new JProperty("BigInteger", new BigInteger(100))
 #endif
                 );
@@ -715,7 +717,7 @@ namespace Newtonsoft.Json.Tests.Linq
             Assert.AreEqual("http://json.codeplex.com/", d.Uri.ToString());
             Assert.AreEqual("ea27fe1d-0d80-44f2-bf34-4654156fa7af", d.Guid.ToString());
             Assert.AreEqual("1.00:00:00", d.TimeSpan.ToString());
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             Assert.AreEqual("100", d.BigInteger.ToString());
 #endif
         }
@@ -799,7 +801,7 @@ namespace Newtonsoft.Json.Tests.Linq
             AssertValueConverted<Guid?>(null);
             AssertValueConverted<Uri>(new Uri("http://json.codeplex.com/"));
             AssertValueConverted<Uri>(null);
-#if !(NET20 || NET35 || PORTABLE || DNXCORE50)
+#if !(NET20 || NET35 || PORTABLE) || NETSTANDARD1_3
             AssertValueConverted<BigInteger>(new BigInteger(100));
             AssertValueConverted<BigInteger?>(null);
 #endif
@@ -855,7 +857,6 @@ namespace Newtonsoft.Json.Tests.Linq
             string oldRole = (string)oldAndBusted["Roles"][0];
             // Admin
 
-
             dynamic newHotness = new JObject();
             newHotness.Name = "Arnie Admin";
             newHotness.Enabled = true;
@@ -901,6 +902,57 @@ namespace Newtonsoft.Json.Tests.Linq
   ""StockCount"": 9000,
   ""StockValue"": 22050.00
 }", json);
+        }
+
+        [Test]
+        public void DynamicAccess_ToJToken_ShouldNotFail()
+        {
+            Guid g = Guid.NewGuid();
+            dynamic json = JObject.FromObject(new { uid = g });
+            JToken token = json.uid;
+
+            Assert.AreEqual(g, ((JValue)token).Value);
+        }
+
+        [Test]
+        public void DynamicAccess_ToJTokenExplicit_ShouldNotFail()
+        {
+            Guid g = Guid.NewGuid();
+            dynamic json = JObject.FromObject(new { uid = g });
+            JToken token = (JToken)json.uid;
+
+            Assert.AreEqual(g, ((JValue)token).Value);
+        }
+
+        [Test]
+        public void DynamicAccess_ToJTokenSafeCast_ShouldNotFail()
+        {
+            Guid g = Guid.NewGuid();
+            dynamic json = JObject.FromObject(new { uid = g });
+            JToken token = json.uid as JToken;
+
+            Assert.AreEqual(g, ((JValue)token).Value);
+        }
+
+        [Test]
+        public void IndexAccess_ToJToken_ShouldNotFail()
+        {
+            Guid g = Guid.NewGuid();
+            JObject json = JObject.FromObject(new { uid = g });
+            JToken token = json["uid"];
+
+            Assert.AreEqual(g, ((JValue)token).Value);
+        }
+
+        [Test]
+        public void DynamicAccess_ToJToken_ShouldFail()
+        {
+            Guid g = Guid.NewGuid();
+            dynamic json = JObject.FromObject(new { uid = g });
+
+            ExceptionAssert.Throws<InvalidOperationException>(
+                () => { JObject token = json.uid; },
+                "Can not convert from System.Guid to Newtonsoft.Json.Linq.JObject.");
         }
     }
 

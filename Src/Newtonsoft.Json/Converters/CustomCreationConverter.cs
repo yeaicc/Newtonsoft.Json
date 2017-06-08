@@ -24,12 +24,13 @@
 #endregion
 
 using System;
+using System.Reflection;
 using Newtonsoft.Json.Utilities;
 
 namespace Newtonsoft.Json.Converters
 {
     /// <summary>
-    /// Create a custom object
+    /// Creates a custom object.
     /// </summary>
     /// <typeparam name="T">The object type to convert.</typeparam>
     public abstract class CustomCreationConverter<T> : JsonConverter
@@ -56,11 +57,15 @@ namespace Newtonsoft.Json.Converters
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
+            {
                 return null;
+            }
 
             T value = Create(objectType);
             if (value == null)
+            {
                 throw new JsonSerializationException("No object created.");
+            }
 
             serializer.Populate(reader, value);
             return value;

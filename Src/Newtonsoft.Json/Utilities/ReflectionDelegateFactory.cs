@@ -28,7 +28,7 @@ using System.Globalization;
 using System.Reflection;
 using Newtonsoft.Json.Serialization;
 
-#if NET20
+#if !HAVE_LINQ
 using Newtonsoft.Json.Utilities.LinqBridge;
 #endif
 
@@ -40,11 +40,15 @@ namespace Newtonsoft.Json.Utilities
         {
             PropertyInfo propertyInfo = memberInfo as PropertyInfo;
             if (propertyInfo != null)
+            {
                 return CreateGet<T>(propertyInfo);
+            }
 
             FieldInfo fieldInfo = memberInfo as FieldInfo;
             if (fieldInfo != null)
+            {
                 return CreateGet<T>(fieldInfo);
+            }
 
             throw new Exception("Could not create getter for {0}.".FormatWith(CultureInfo.InvariantCulture, memberInfo));
         }
@@ -53,17 +57,21 @@ namespace Newtonsoft.Json.Utilities
         {
             PropertyInfo propertyInfo = memberInfo as PropertyInfo;
             if (propertyInfo != null)
+            {
                 return CreateSet<T>(propertyInfo);
+            }
 
             FieldInfo fieldInfo = memberInfo as FieldInfo;
             if (fieldInfo != null)
+            {
                 return CreateSet<T>(fieldInfo);
+            }
 
             throw new Exception("Could not create setter for {0}.".FormatWith(CultureInfo.InvariantCulture, memberInfo));
         }
 
         public abstract MethodCall<T, object> CreateMethodCall<T>(MethodBase method);
-        public abstract ObjectConstructor<object> CreateParametrizedConstructor(MethodBase method);
+        public abstract ObjectConstructor<object> CreateParameterizedConstructor(MethodBase method);
         public abstract Func<T> CreateDefaultConstructor<T>(Type type);
         public abstract Func<T, object> CreateGet<T>(PropertyInfo propertyInfo);
         public abstract Func<T, object> CreateGet<T>(FieldInfo fieldInfo);

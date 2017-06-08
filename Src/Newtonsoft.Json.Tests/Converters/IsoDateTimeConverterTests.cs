@@ -25,11 +25,8 @@
 
 using System;
 using Newtonsoft.Json.Tests.TestObjects;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using TestFixture = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
-using Test = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
-#elif DNXCORE50
+using Newtonsoft.Json.Tests.TestObjects.Organization;
+#if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
 using Assert = Newtonsoft.Json.Tests.XUnitAssert;
@@ -126,11 +123,15 @@ namespace Newtonsoft.Json.Tests.Converters
             Assert.AreEqual(2006, d.Year);
         }
 
-#if !(NETFX_CORE || DNXCORE50)
+#if !(DNXCORE50)
         [Test]
         public void SerializeFormattedDateTimeNewZealandCulture()
         {
-            IsoDateTimeConverter converter = new IsoDateTimeConverter() { DateTimeFormat = "F", Culture = CultureInfo.GetCultureInfo("en-NZ") };
+            CultureInfo culture = new CultureInfo("en-NZ");
+            culture.DateTimeFormat.AMDesignator = "a.m.";
+            culture.DateTimeFormat.PMDesignator = "p.m.";
+
+            IsoDateTimeConverter converter = new IsoDateTimeConverter() { DateTimeFormat = "F", Culture = culture };
 
             DateTime d = new DateTime(2000, 12, 15, 22, 11, 3, 0, DateTimeKind.Utc);
             string result;
@@ -252,9 +253,13 @@ namespace Newtonsoft.Json.Tests.Converters
 
             // if the current timezone is utc then local already equals utc
             if (offset == TimeSpan.Zero)
+            {
                 Assert.AreEqual(json, json2);
+            }
             else
+            {
                 Assert.AreNotEqual(json, json2);
+            }
         }
 #endif
 

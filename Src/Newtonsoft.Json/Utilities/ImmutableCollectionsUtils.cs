@@ -23,7 +23,8 @@
 // OTHER DEALINGS IN THE SOFTWARE.
 #endregion
 
-#if !(NET20 || NET35 || NET40 || PORTABLE40)
+#if HAVE_IMMUTABLE_COLLECTIONS
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,7 +123,7 @@ namespace Newtonsoft.Json.Utilities
                         {
                             createdType = createdTypeDefinition.MakeGenericType(collectionItemType);
                             MethodInfo method = mb.MakeGenericMethod(collectionItemType);
-                            parameterizedCreator = JsonTypeReflector.ReflectionDelegateFactory.CreateParametrizedConstructor(method);
+                            parameterizedCreator = JsonTypeReflector.ReflectionDelegateFactory.CreateParameterizedConstructor(method);
                             return true;
                         }
                     }
@@ -145,8 +146,8 @@ namespace Newtonsoft.Json.Utilities
                 if (definition != null)
                 {
                     Type createdTypeDefinition = underlyingTypeDefinition.Assembly().GetType(definition.CreatedTypeName);
-                    Type builderTypeDefinition = underlyingTypeDefinition.Assembly().GetType(definition.BuilderTypeName); 
-                    
+                    Type builderTypeDefinition = underlyingTypeDefinition.Assembly().GetType(definition.BuilderTypeName);
+
                     if (createdTypeDefinition != null && builderTypeDefinition != null)
                     {
                         MethodInfo mb = builderTypeDefinition.GetMethods().FirstOrDefault(m =>
@@ -159,7 +160,7 @@ namespace Newtonsoft.Json.Utilities
                         {
                             createdType = createdTypeDefinition.MakeGenericType(keyItemType, valueItemType);
                             MethodInfo method = mb.MakeGenericMethod(keyItemType, valueItemType);
-                            parameterizedCreator = JsonTypeReflector.ReflectionDelegateFactory.CreateParametrizedConstructor(method);
+                            parameterizedCreator = JsonTypeReflector.ReflectionDelegateFactory.CreateParameterizedConstructor(method);
                             return true;
                         }
                     }
@@ -172,4 +173,5 @@ namespace Newtonsoft.Json.Utilities
         }
     }
 }
+
 #endif

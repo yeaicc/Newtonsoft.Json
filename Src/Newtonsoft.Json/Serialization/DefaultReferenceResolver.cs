@@ -35,14 +35,19 @@ namespace Newtonsoft.Json.Serialization
 
         private BidirectionalDictionary<string, object> GetMappings(object context)
         {
-            JsonSerializerInternalBase internalSerializer;
-
-            if (context is JsonSerializerInternalBase)
-                internalSerializer = (JsonSerializerInternalBase)context;
-            else if (context is JsonSerializerProxy)
-                internalSerializer = ((JsonSerializerProxy)context).GetInternalSerializer();
-            else
-                throw new JsonException("The DefaultReferenceResolver can only be used internally.");
+            JsonSerializerInternalBase internalSerializer = context as JsonSerializerInternalBase;
+            if (internalSerializer == null)
+            {
+                JsonSerializerProxy proxy = context as JsonSerializerProxy;
+                if (proxy != null)
+                {
+                    internalSerializer = proxy.GetInternalSerializer();
+                }
+                else
+                {
+                    throw new JsonException("The DefaultReferenceResolver can only be used internally.");
+                }
+            }
 
             return internalSerializer.DefaultReferenceMappings;
         }
@@ -56,7 +61,7 @@ namespace Newtonsoft.Json.Serialization
 
         public string GetReference(object context, object value)
         {
-            var mappings = GetMappings(context);
+            BidirectionalDictionary<string, object> mappings = GetMappings(context);
 
             string reference;
             if (!mappings.TryGetBySecond(value, out reference))

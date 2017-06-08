@@ -25,7 +25,7 @@
 
 using System;
 using System.Collections.Generic;
-#if NET20
+#if !HAVE_LINQ
 using Newtonsoft.Json.Utilities.LinqBridge;
 #endif
 using System.Threading;
@@ -42,7 +42,9 @@ namespace Newtonsoft.Json.Utilities
         public ThreadSafeStore(Func<TKey, TValue> creator)
         {
             if (creator == null)
-                throw new ArgumentNullException("creator");
+            {
+                throw new ArgumentNullException(nameof(creator));
+            }
 
             _creator = creator;
             _store = new Dictionary<TKey, TValue>();
@@ -52,7 +54,9 @@ namespace Newtonsoft.Json.Utilities
         {
             TValue value;
             if (!_store.TryGetValue(key, out value))
+            {
                 return AddValue(key);
+            }
 
             return value;
         }
@@ -73,12 +77,14 @@ namespace Newtonsoft.Json.Utilities
                     // double check locking
                     TValue checkValue;
                     if (_store.TryGetValue(key, out checkValue))
+                    {
                         return checkValue;
+                    }
 
                     Dictionary<TKey, TValue> newStore = new Dictionary<TKey, TValue>(_store);
                     newStore[key] = value;
 
-#if !(NETFX_CORE || PORTABLE)
+#if HAVE_MEMORY_BARRIER
                     Thread.MemoryBarrier();
 #endif
                     _store = newStore;

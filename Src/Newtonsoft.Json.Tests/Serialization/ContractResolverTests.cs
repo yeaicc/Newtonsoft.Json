@@ -28,11 +28,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Runtime.Serialization;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using TestFixture = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
-using Test = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
-#elif DNXCORE50
+#if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
 using Assert = Newtonsoft.Json.Tests.XUnitAssert;
@@ -46,9 +42,11 @@ using System.Linq;
 #endif
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json.Tests.TestObjects;
+using Newtonsoft.Json.Tests.TestObjects.Organization;
 using System.Reflection;
 using Newtonsoft.Json.Utilities;
 using System.Globalization;
+using Newtonsoft.Json.Linq;
 
 namespace Newtonsoft.Json.Tests.Serialization
 {
@@ -57,9 +55,6 @@ namespace Newtonsoft.Json.Tests.Serialization
         private readonly char _startingWithChar;
 
         public DynamicContractResolver(char startingWithChar)
-#pragma warning disable 612,618
-            : base(false)
-#pragma warning restore 612,618
         {
             _startingWithChar = startingWithChar;
         }
@@ -101,7 +96,9 @@ namespace Newtonsoft.Json.Tests.Serialization
         protected override JsonContract CreateContract(Type objectType)
         {
             if (objectType == typeof(Employee))
+            {
                 objectType = typeof(IPerson);
+            }
 
             return base.CreateContract(objectType);
         }
@@ -112,12 +109,35 @@ namespace Newtonsoft.Json.Tests.Serialization
 #if !NET20
         [DataMember(Name = "CustomerAddress1")]
 #endif
-            public string AddressLine1 { get; set; }
+        public string AddressLine1 { get; set; }
     }
 
     [TestFixture]
     public class ContractResolverTests : TestFixtureBase
     {
+#if !(PORTABLE || PORTABLE40) || NETSTANDARD1_3
+        [Test]
+        public void ResolveSerializableContract()
+        {
+            DefaultContractResolver contractResolver = new DefaultContractResolver();
+            JsonContract contract = contractResolver.ResolveContract(typeof(ISerializableTestObject));
+
+            Assert.AreEqual(JsonContractType.Serializable, contract.ContractType);
+        }
+
+        [Test]
+        public void ResolveObjectContractWithFieldsSerialization()
+        {
+            DefaultContractResolver contractResolver = new DefaultContractResolver
+            {
+                IgnoreSerializableAttribute = false
+            };
+            JsonObjectContract contract = (JsonObjectContract)contractResolver.ResolveContract(typeof(AnswerFilterModel));
+
+            Assert.AreEqual(MemberSerialization.Fields, contract.MemberSerialization);
+        }
+#endif
+
         [Test]
         public void JsonPropertyDefaultValue()
         {
@@ -128,7 +148,7 @@ namespace Newtonsoft.Json.Tests.Serialization
 
             p.PropertyType = typeof(int);
 
-            Assert.AreEqual(0 , p.GetResolvedDefaultValue());
+            Assert.AreEqual(0, p.GetResolvedDefaultValue());
             Assert.AreEqual(null, p.DefaultValue);
 
             p.PropertyType = typeof(DateTime);
@@ -202,7 +222,7 @@ namespace Newtonsoft.Json.Tests.Serialization
 
             Assert.IsFalse(contract.IsInstantiable);
             Assert.IsNull(contract.DefaultCreator);
-            Assert.IsFalse(contract.HasParametrizedCreator);
+            Assert.IsFalse(contract.HasParameterizedCreatorInternal);
 
             ExceptionAssert.Throws<JsonSerializationException>(() => JsonConvert.DeserializeObject<AbstractListTestClass<int>>(@"[1,2]", new JsonSerializerSettings
             {
@@ -222,7 +242,7 @@ namespace Newtonsoft.Json.Tests.Serialization
         }
 
         public class CustomList<T> : List<T>
-        {   
+        {
         }
 
         [Test]
@@ -282,7 +302,7 @@ namespace Newtonsoft.Json.Tests.Serialization
 
             Assert.IsFalse(contract.IsInstantiable);
             Assert.IsNull(contract.DefaultCreator);
-            Assert.IsFalse(contract.HasParametrizedCreator);
+            Assert.IsFalse(contract.HasParameterizedCreatorInternal);
 
             ExceptionAssert.Throws<JsonSerializationException>(() => JsonConvert.DeserializeObject<AbstractDictionaryTestClass<string, int>>(@"{key1:1,key2:2}", new JsonSerializerSettings
             {
@@ -435,43 +455,33 @@ namespace Newtonsoft.Json.Tests.Serialization
         }
 
         [Test]
-        public void ParametrizedCreator()
+        public void ParameterizedCreator()
         {
             var resolver = new DefaultContractResolver();
-            var contract = (JsonObjectContract)resolver.ResolveContract(typeof(PublicParametizedConstructorWithPropertyNameConflictWithAttribute));
+            var contract = (JsonObjectContract)resolver.ResolveContract(typeof(PublicParameterizedConstructorWithPropertyNameConflictWithAttribute));
 
             Assert.IsNull(contract.DefaultCreator);
-            Assert.IsNotNull(contract.ParametrizedCreator);
-#pragma warning disable 618
-            Assert.AreEqual(contract.ParametrizedConstructor, typeof(PublicParametizedConstructorWithPropertyNameConflictWithAttribute).GetConstructor(new[] { typeof(string) }));
-#pragma warning restore 618
+            Assert.IsNotNull(contract.ParameterizedCreator);
             Assert.AreEqual(1, contract.CreatorParameters.Count);
             Assert.AreEqual("name", contract.CreatorParameters[0].PropertyName);
 
-#pragma warning disable 618
-            contract.ParametrizedConstructor = null;
-#pragma warning restore 618
-            Assert.IsNull(contract.ParametrizedCreator);
+            contract.ParameterizedCreator = null;
+            Assert.IsNull(contract.ParameterizedCreator);
         }
 
         [Test]
         public void OverrideCreator()
         {
             var resolver = new DefaultContractResolver();
-            var contract = (JsonObjectContract)resolver.ResolveContract(typeof(MultipleParamatrizedConstructorsJsonConstructor));
+            var contract = (JsonObjectContract)resolver.ResolveContract(typeof(MultipleParametrizedConstructorsJsonConstructor));
 
             Assert.IsNull(contract.DefaultCreator);
             Assert.IsNotNull(contract.OverrideCreator);
-#pragma warning disable 618
-            Assert.AreEqual(contract.OverrideConstructor, typeof(MultipleParamatrizedConstructorsJsonConstructor).GetConstructor(new[] { typeof(string), typeof(int) }));
-#pragma warning restore 618
             Assert.AreEqual(2, contract.CreatorParameters.Count);
             Assert.AreEqual("Value", contract.CreatorParameters[0].PropertyName);
             Assert.AreEqual("Age", contract.CreatorParameters[1].PropertyName);
 
-#pragma warning disable 618
-            contract.OverrideConstructor = null;
-#pragma warning restore 618
+            contract.OverrideCreator = null;
             Assert.IsNull(contract.OverrideCreator);
         }
 
@@ -479,20 +489,18 @@ namespace Newtonsoft.Json.Tests.Serialization
         public void CustomOverrideCreator()
         {
             var resolver = new DefaultContractResolver();
-            var contract = (JsonObjectContract)resolver.ResolveContract(typeof(MultipleParamatrizedConstructorsJsonConstructor));
+            var contract = (JsonObjectContract)resolver.ResolveContract(typeof(MultipleParametrizedConstructorsJsonConstructor));
 
             bool ensureCustomCreatorCalled = false;
 
             contract.OverrideCreator = args =>
             {
                 ensureCustomCreatorCalled = true;
-                return new MultipleParamatrizedConstructorsJsonConstructor((string) args[0], (int) args[1]);
+                return new MultipleParametrizedConstructorsJsonConstructor((string)args[0], (int)args[1]);
             };
-#pragma warning disable 618
-            Assert.IsNull(contract.OverrideConstructor);
-#pragma warning restore 618
+            Assert.IsNotNull(contract.OverrideCreator);
 
-            var o = JsonConvert.DeserializeObject<MultipleParamatrizedConstructorsJsonConstructor>("{Value:'value!', Age:1}", new JsonSerializerSettings
+            var o = JsonConvert.DeserializeObject<MultipleParametrizedConstructorsJsonConstructor>("{Value:'value!', Age:1}", new JsonSerializerSettings
             {
                 ContractResolver = resolver
             });
@@ -565,7 +573,7 @@ namespace Newtonsoft.Json.Tests.Serialization
 }", startingWithB);
         }
 
-#if !(NETFX_CORE || PORTABLE || DNXCORE50 || PORTABLE40)
+#if !(PORTABLE || PORTABLE40)
 #pragma warning disable 618
         [Test]
         public void SerializeCompilerGeneratedMembers()
@@ -602,16 +610,45 @@ namespace Newtonsoft.Json.Tests.Serialization
             string includeCompilerGeneratedJson = JsonConvert.SerializeObject(structTest, Formatting.Indented,
                 new JsonSerializerSettings { ContractResolver = includeCompilerGeneratedResolver });
 
-            StringAssert.AreEqual(@"{
-  ""StringField"": ""Field"",
-  ""IntField"": 1,
-  ""<StringProperty>k__BackingField"": ""Property"",
-  ""<IntProperty>k__BackingField"": 2,
-  ""StringProperty"": ""Property"",
-  ""IntProperty"": 2
-}", includeCompilerGeneratedJson);
+            JObject o = JObject.Parse(includeCompilerGeneratedJson);
+
+            Console.WriteLine(includeCompilerGeneratedJson);
+
+            Assert.AreEqual("Property", (string)o["<StringProperty>k__BackingField"]);
+            Assert.AreEqual(2, (int)o["<IntProperty>k__BackingField"]);
         }
 #pragma warning restore 618
 #endif
+
+        public class ClassWithExtensionData
+        {
+            [JsonExtensionData]
+            public IDictionary<string, object> Data { get; set; }
+        }
+
+        [Test]
+        public void ExtensionDataGetterCanBeIteratedMultipleTimes()
+        {
+            DefaultContractResolver resolver = new DefaultContractResolver();
+            JsonObjectContract contract = (JsonObjectContract)resolver.ResolveContract(typeof(ClassWithExtensionData));
+
+            ClassWithExtensionData myClass = new ClassWithExtensionData
+            {
+                Data = new Dictionary<string, object>
+                {
+                    { "SomeField", "Field" },
+                }
+            };
+
+            ExtensionDataGetter getter = contract.ExtensionDataGetter;
+
+            IEnumerable<KeyValuePair<object, object>> dictionaryData = getter(myClass).ToDictionary(kv => kv.Key, kv => kv.Value);
+            Assert.IsTrue(dictionaryData.Any());
+            Assert.IsTrue(dictionaryData.Any());
+
+            IEnumerable<KeyValuePair<object, object>> extensionData = getter(myClass);
+            Assert.IsTrue(extensionData.Any());
+            Assert.IsTrue(extensionData.Any()); // second test fails if the enumerator returned isn't reset
+        }
     }
 }

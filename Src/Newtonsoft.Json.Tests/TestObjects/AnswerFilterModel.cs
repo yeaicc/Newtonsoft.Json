@@ -29,11 +29,12 @@ using System.Collections;
 using Newtonsoft.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
+
 #endif
 
 namespace Newtonsoft.Json.Tests.TestObjects
 {
-#if !(NETFX_CORE || PORTABLE || DNXCORE50)
+#if !(PORTABLE || DNXCORE50) || NETSTANDARD1_3
     [Serializable]
     public class AnswerFilterModel
     {

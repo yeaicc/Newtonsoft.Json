@@ -34,11 +34,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using TestFixture = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
-using Test = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
-#elif DNXCORE50
+#if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
 using Assert = Newtonsoft.Json.Tests.XUnitAssert;
@@ -113,9 +109,13 @@ namespace Newtonsoft.Json.Tests.Documentation
             while (reader.Read())
             {
                 if (reader.Value != null)
+                {
                     Console.WriteLine("Token: {0}, Value: {1}", reader.TokenType, reader.Value);
+                }
                 else
+                {
                     Console.WriteLine("Token: {0}", reader.TokenType);
+                }
             }
 
             // Token: StartObject

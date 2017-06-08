@@ -29,11 +29,7 @@ using System.Linq;
 using System;
 using System.Diagnostics;
 using System.Reflection;
-#if NETFX_CORE
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using TestFixture = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestClassAttribute;
-using Test = Microsoft.VisualStudio.TestPlatform.UnitTestFramework.TestMethodAttribute;
-#elif DNXCORE50
+#if DNXCORE50
 using Xunit;
 using Test = Xunit.FactAttribute;
 using Assert = Newtonsoft.Json.Tests.XUnitAssert;
@@ -43,6 +39,7 @@ using NUnit.Framework;
 using Newtonsoft.Json.Serialization;
 using Newtonsoft.Json.Utilities;
 using Newtonsoft.Json.Tests.TestObjects;
+using Newtonsoft.Json.Tests.TestObjects.Organization;
 using Newtonsoft.Json.Tests.Serialization;
 
 namespace Newtonsoft.Json.Tests.Utilities
@@ -55,7 +52,7 @@ namespace Newtonsoft.Json.Tests.Utilities
         {
             ConstructorInfo constructor = TestReflectionUtils.GetConstructors(typeof(OutAndRefTestClass)).Single(c => c.GetParameters().Count() == 1);
 
-            var creator = ExpressionReflectionDelegateFactory.Instance.CreateParametrizedConstructor(constructor);
+            var creator = ExpressionReflectionDelegateFactory.Instance.CreateParameterizedConstructor(constructor);
 
             object[] args = new object[] { "Input" };
             OutAndRefTestClass o = (OutAndRefTestClass)creator(args);
@@ -68,7 +65,7 @@ namespace Newtonsoft.Json.Tests.Utilities
         {
             ConstructorInfo constructor = TestReflectionUtils.GetConstructors(typeof(OutAndRefTestClass)).Single(c => c.GetParameters().Count() == 2);
 
-            var creator = ExpressionReflectionDelegateFactory.Instance.CreateParametrizedConstructor(constructor);
+            var creator = ExpressionReflectionDelegateFactory.Instance.CreateParameterizedConstructor(constructor);
 
             object[] args = new object[] { "Input", null };
             OutAndRefTestClass o = (OutAndRefTestClass)creator(args);
@@ -81,7 +78,7 @@ namespace Newtonsoft.Json.Tests.Utilities
         {
             ConstructorInfo constructor = TestReflectionUtils.GetConstructors(typeof(OutAndRefTestClass)).Single(c => c.GetParameters().Count() == 3);
 
-            var creator = ExpressionReflectionDelegateFactory.Instance.CreateParametrizedConstructor(constructor);
+            var creator = ExpressionReflectionDelegateFactory.Instance.CreateParameterizedConstructor(constructor);
 
             object[] args = new object[] { "Input", true, null };
             OutAndRefTestClass o = (OutAndRefTestClass)creator(args);
@@ -113,11 +110,13 @@ namespace Newtonsoft.Json.Tests.Utilities
         public void DefaultConstructor_Abstract()
         {
             ExceptionAssert.Throws<Exception>(
-                () => {
+                () =>
+                {
                     Func<object> create = ExpressionReflectionDelegateFactory.Instance.CreateDefaultConstructor<object>(typeof(Type));
 
                     create();
-                }, new [] { 
+                }, new[]
+                {
                     "Cannot create an abstract class.",
                     "Cannot create an abstract class 'System.Type'." // mono
                 });
@@ -285,7 +284,8 @@ namespace Newtonsoft.Json.Tests.Utilities
         public void CreateGetWithBadObjectTarget()
         {
             ExceptionAssert.Throws<InvalidCastException>(
-                () => {
+                () =>
+                {
                     Person p = new Person();
                     p.Name = "Hi";
 
@@ -293,8 +293,9 @@ namespace Newtonsoft.Json.Tests.Utilities
 
                     setter(p);
                 },
-                new [] {
-                    "Unable to cast object of type 'Newtonsoft.Json.Tests.TestObjects.Person' to type 'Newtonsoft.Json.Tests.TestObjects.Movie'.",
+                new[]
+                {
+                    "Unable to cast object of type 'Newtonsoft.Json.Tests.TestObjects.Organization.Person' to type 'Newtonsoft.Json.Tests.TestObjects.Movie'.",
                     "Cannot cast from source type to destination type." // mono
                 });
         }
@@ -303,7 +304,8 @@ namespace Newtonsoft.Json.Tests.Utilities
         public void CreateSetWithBadObjectTarget()
         {
             ExceptionAssert.Throws<InvalidCastException>(
-                () => {
+                () =>
+                {
                     Person p = new Person();
                     Movie m = new Movie();
 
@@ -317,8 +319,9 @@ namespace Newtonsoft.Json.Tests.Utilities
 
                     Assert.AreEqual(p.Name, "Hi");
                 },
-                new [] {
-                    "Unable to cast object of type 'Newtonsoft.Json.Tests.TestObjects.Person' to type 'Newtonsoft.Json.Tests.TestObjects.Movie'.",
+                new[]
+                {
+                    "Unable to cast object of type 'Newtonsoft.Json.Tests.TestObjects.Organization.Person' to type 'Newtonsoft.Json.Tests.TestObjects.Movie'.",
                     "Cannot cast from source type to destination type." // mono
                 });
         }
@@ -327,13 +330,15 @@ namespace Newtonsoft.Json.Tests.Utilities
         public void CreateSetWithBadObjectValue()
         {
             ExceptionAssert.Throws<InvalidCastException>(
-                () => {
+                () =>
+                {
                     Movie m = new Movie();
 
                     Action<object, object> setter = ExpressionReflectionDelegateFactory.Instance.CreateSet<object>(TestReflectionUtils.GetProperty(typeof(Movie), "Name"));
 
                     setter(m, new Version("1.1.1.1"));
-                }, new [] { 
+                }, new[]
+                {
                     "Unable to cast object of type 'System.Version' to type 'System.String'.",
                     "Cannot cast from source type to destination type." //mono
                 });
@@ -354,6 +359,50 @@ namespace Newtonsoft.Json.Tests.Utilities
             JsonSerializerTest.DictionaryKey key = (JsonSerializerTest.DictionaryKey)result;
             Assert.AreEqual("First!", key.Value);
         }
+
+        [Test]
+        public void ConstructorStruct()
+        {
+            Func<object> creator1 = ExpressionReflectionDelegateFactory.Instance.CreateDefaultConstructor<object>(typeof(MyStruct));
+            MyStruct myStruct1 = (MyStruct)creator1.Invoke();
+            Assert.AreEqual(0, myStruct1.IntProperty);
+
+            Func<MyStruct> creator2 = ExpressionReflectionDelegateFactory.Instance.CreateDefaultConstructor<MyStruct>(typeof(MyStruct));
+            MyStruct myStruct2 = creator2.Invoke();
+            Assert.AreEqual(0, myStruct2.IntProperty);
+        }
+
+        public struct TestStruct
+        {
+            public TestStruct(int i)
+            {
+                Value = i;
+            }
+
+            public int Value { get; }
+        }
+
+        public static TestStruct StructMethod(TestStruct s)
+        {
+            return new TestStruct(s.Value + s.Value);
+        }
+
+        [Test]
+        public void CreateStructMethodCall()
+        {
+            MethodInfo methodInfo = typeof(ExpressionReflectionDelegateFactoryTests).GetMethod(nameof(StructMethod), new[] { typeof(TestStruct) });
+
+            Assert.IsNotNull(methodInfo);
+
+            MethodCall<object, object> call = ExpressionReflectionDelegateFactory.Instance.CreateMethodCall<object>(methodInfo);
+
+            object result = call(null, new TestStruct(123));
+            Assert.IsNotNull(result);
+
+            TestStruct s = (TestStruct)result;
+            Assert.AreEqual(246, s.Value);
+        }
     }
 }
+
 #endif

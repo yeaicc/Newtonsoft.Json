@@ -24,6 +24,7 @@
 #endregion
 
 using System;
+using System.Collections;
 using System.Globalization;
 using System.Runtime.Serialization.Formatters;
 using Newtonsoft.Json.Utilities;
@@ -53,6 +54,12 @@ namespace Newtonsoft.Json.Serialization
         {
             get { return _serializer.TraceWriter; }
             set { _serializer.TraceWriter = value; }
+        }
+
+        public override IEqualityComparer EqualityComparer
+        {
+            get { return _serializer.EqualityComparer; }
+            set { _serializer.EqualityComparer = value; }
         }
 
         public override JsonConverterCollection Converters
@@ -114,10 +121,17 @@ namespace Newtonsoft.Json.Serialization
             set { _serializer.MetadataPropertyHandling = value; }
         }
 
+        [Obsolete("TypeNameAssemblyFormat is obsolete. Use TypeNameAssemblyFormatHandling instead.")]
         public override FormatterAssemblyStyle TypeNameAssemblyFormat
         {
             get { return _serializer.TypeNameAssemblyFormat; }
             set { _serializer.TypeNameAssemblyFormat = value; }
+        }
+
+        public override TypeNameAssemblyFormatHandling TypeNameAssemblyFormatHandling
+        {
+            get { return _serializer.TypeNameAssemblyFormatHandling; }
+            set { _serializer.TypeNameAssemblyFormatHandling = value; }
         }
 
         public override ConstructorHandling ConstructorHandling
@@ -126,10 +140,17 @@ namespace Newtonsoft.Json.Serialization
             set { _serializer.ConstructorHandling = value; }
         }
 
+        [Obsolete("Binder is obsolete. Use SerializationBinder instead.")]
         public override SerializationBinder Binder
         {
             get { return _serializer.Binder; }
             set { _serializer.Binder = value; }
+        }
+
+        public override ISerializationBinder SerializationBinder
+        {
+            get { return _serializer.SerializationBinder; }
+            set { _serializer.SerializationBinder = value; }
         }
 
         public override StreamingContext Context
@@ -207,14 +228,18 @@ namespace Newtonsoft.Json.Serialization
         internal JsonSerializerInternalBase GetInternalSerializer()
         {
             if (_serializerReader != null)
+            {
                 return _serializerReader;
+            }
             else
+            {
                 return _serializerWriter;
+            }
         }
 
         public JsonSerializerProxy(JsonSerializerInternalReader serializerReader)
         {
-            ValidationUtils.ArgumentNotNull(serializerReader, "serializerReader");
+            ValidationUtils.ArgumentNotNull(serializerReader, nameof(serializerReader));
 
             _serializerReader = serializerReader;
             _serializer = serializerReader.Serializer;
@@ -222,7 +247,7 @@ namespace Newtonsoft.Json.Serialization
 
         public JsonSerializerProxy(JsonSerializerInternalWriter serializerWriter)
         {
-            ValidationUtils.ArgumentNotNull(serializerWriter, "serializerWriter");
+            ValidationUtils.ArgumentNotNull(serializerWriter, nameof(serializerWriter));
 
             _serializerWriter = serializerWriter;
             _serializer = serializerWriter.Serializer;
@@ -231,25 +256,37 @@ namespace Newtonsoft.Json.Serialization
         internal override object DeserializeInternal(JsonReader reader, Type objectType)
         {
             if (_serializerReader != null)
+            {
                 return _serializerReader.Deserialize(reader, objectType, false);
+            }
             else
+            {
                 return _serializer.Deserialize(reader, objectType);
+            }
         }
 
         internal override void PopulateInternal(JsonReader reader, object target)
         {
             if (_serializerReader != null)
+            {
                 _serializerReader.Populate(reader, target);
+            }
             else
+            {
                 _serializer.Populate(reader, target);
+            }
         }
 
         internal override void SerializeInternal(JsonWriter jsonWriter, object value, Type rootType)
         {
             if (_serializerWriter != null)
+            {
                 _serializerWriter.Serialize(jsonWriter, value, rootType);
+            }
             else
+            {
                 _serializer.Serialize(jsonWriter, value);
+            }
         }
     }
 }

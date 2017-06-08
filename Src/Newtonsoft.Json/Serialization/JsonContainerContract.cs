@@ -28,7 +28,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Newtonsoft.Json.Utilities;
 using System.Collections;
-#if NET20
+#if !HAVE_LINQ
 using Newtonsoft.Json.Utilities.LinqBridge;
 #else
 using System.Linq;
@@ -38,7 +38,7 @@ using System.Linq;
 namespace Newtonsoft.Json.Serialization
 {
     /// <summary>
-    /// Contract details for a <see cref="Type"/> used by the <see cref="JsonSerializer"/>.
+    /// Contract details for a <see cref="System.Type"/> used by the <see cref="JsonSerializer"/>.
     /// </summary>
     public class JsonContainerContract : JsonContract
     {
@@ -105,8 +105,11 @@ namespace Newtonsoft.Json.Serialization
             if (jsonContainerAttribute != null)
             {
                 if (jsonContainerAttribute.ItemConverterType != null)
-                    ItemConverter = JsonTypeReflector.CreateJsonConverterInstance(jsonContainerAttribute.ItemConverterType, 
-                                                                                  jsonContainerAttribute.ItemConverterParameters);
+                {
+                    ItemConverter = JsonTypeReflector.CreateJsonConverterInstance(
+                        jsonContainerAttribute.ItemConverterType,
+                        jsonContainerAttribute.ItemConverterParameters);
+                }
 
                 ItemIsReference = jsonContainerAttribute._itemIsReference;
                 ItemReferenceLoopHandling = jsonContainerAttribute._itemReferenceLoopHandling;
